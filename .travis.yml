@@ -2,10 +2,8 @@ language: cpp
 
 jobs:
   include:
-    - os: windows
-      before_install:
-        - choco install opencv
     - os: linux
+      arch: amd64
       before_install:
         - sudo apt install libopencv-dev
 
@@ -16,9 +14,5 @@ branches:
 script:
     - mkdir build
     - cd build
-    - if [[ ${TRAVIS_OS_NAME} == "windows" ]]; then
-        cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..;
-      else
-        cmake ..;
-      fi
+    - cmake ..
     - cmake --build . --config release
