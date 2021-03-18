@@ -1,11 +1,10 @@
 language: cpp
 
-jobs:
-  include:
-    - os: linux
-      arch: amd64
-      before_install:
-        - sudo apt install libopencv-dev
+dist: bionic
+
+before_install:
+  - sudo apt update
+  - sudo apt install libopencv-dev
 
 branches:
   only:
