@@ -1,69 +1,21 @@
 {
    "CharacterModelArray" : [
       {
-         "DirectoryPath" : "",
-         "FilterFilePath" : "",
          "Name" : "NumberLetter"
       }
    ],
    "LabelRecognitionParameterArray" : [
       {
-         "BinarizationModes" : [
-            {
-               "BlockSizeX" : 0,
-               "BlockSizeY" : 0,
-               "EnableFillBinaryVacancy" : 1,
-               "ImagePreprocessingModesIndex" : -1,
-               "LibraryFileName" : "",
-               "LibraryParameters" : "",
-               "Mode" : "DLR_BM_LOCAL_BLOCK",
-               "ThreshValueCoefficient" : 10
-            }
-         ],
-         "CharacterModelName" : "NumberLetter",
-         "GrayscaleTransformationModes" : [
-            {
-               "LibraryFileName" : "",
-               "LibraryParameters" : "",
-               "Mode" : "DLR_GTM_ORIGINAL"
-            }
-         ],
-         "ImagePreprocessingModes" : [
-            {
-               "LibraryFileName" : "",
-               "LibraryParameters" : "",
-               "Mode" : "DLR_IPM_GENERAL"
-            }
-         ],
-         "LetterHeightRange" : [ 1, 100, 1 ],
-         "LineStringRegExPattern" : "",
-         "LinesCount" : 1,
-         "MaxThreadCount" : 4,
          "Name" : "BarcodeLabel",
-         "ReferenceRegionNameArray" : [ "defaultReferenceRegion" ],
-         "RegionPredetectionModes" : [
-            {
-               "LibraryFileName" : "",
-               "LibraryParameters" : "",
-               "MinImageDimension" : 262144,
-               "Mode" : "DLR_RPM_GENERAL",
-               "Sensitivity" : 1
-            }
-         ],
-         "TextRegExPattern" : ""
+         "ReferenceRegionNameArray" : [ "defaultReferenceRegion" ]
       }
    ],
-   "LineSpecificationArray" : null,
    "ReferenceRegionArray" : [
       {
          "Localization" : {
-            "BarcodeFormatIds" : [ "DLR_BF_ALL" ],
-            "BarcodeFormatIds_2" : [ "DLR_BF2_NULL" ],
-            "BarcodeTextRegExPattern" : "",
-            "SourceType" : "DLR_LST_BARCODE"
+            "BarcodeFormatIds" : [ "DLR_BF_ALL" ]
          },
-         "Name" : "defaultReferenceRegion",
-         "TextAreaNameArray" : null
+         "Name" : "defaultReferenceRegion"
       }
    ]
   
