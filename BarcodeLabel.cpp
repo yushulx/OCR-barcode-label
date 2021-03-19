@@ -35,7 +35,7 @@ using namespace dynamsoft::dlr;
 using namespace dynamsoft::dbr;
 using namespace cv;
 
-Mat ori, current;
+Mat ori, current, imageCopy;
 Rect region(0,0,0,0);
 Point startPoint(0,0), endPoint(0,0);
 const char* windowName = "Dynamsoft Label Recognition";
@@ -45,6 +45,7 @@ int maxHeight = 1200, maxWidth = 1200;
 double hScale = 1.0, wScale = 1.0;
 CBarcodeReader dbr;
 json templateObj;
+char pszImageFile[512] = { 0 };
 
 char* readTextFile(const char* filename) {
 	FILE *fp = fopen(filename, "r"); 
@@ -177,6 +178,7 @@ bool SetDetectRegion(CLabelRecognition& dlr, tagDLRPoint* region, char* errorMsg
 	bool bError = false;
 	int iRet = 0;
 
+	dlr.ResetRuntimeSettings();
 	// Get current runtime settings
 	DLRRuntimeSettings settings;
 	dlr.GetRuntimeSettings(&settings);
@@ -220,7 +222,7 @@ void showImage(string windowName, Mat &img)
 
 }
 
-void doOCR()
+void doOCR(bool isAuto)
 {
 	double costTime = 0.0;
 	int errorCode = 0;
@@ -229,33 +231,44 @@ void doOCR()
 	int thickness = 2;
 	Scalar color(0, 255, 0);
 
+	
+	// settings.referenceRegion.localizationSourceType = DLR_LST_BARCODE;
+	// settings.referenceRegion.barcodeFormatIds = BF_ALL;
+	string templateName = "";
+	TextResultArray *resultArray = NULL;
 	dlr.ResetRuntimeSettings();
 	DLRRuntimeSettings settings = {};
 	dlr.GetRuntimeSettings(&settings);
-	settings.linesCount = 2;
+	// settings.linesCount = 2;
 
-	string templateName = templateObj["LabelRecognitionParameterArray"][0]["Name"];
-
-	// Decode barcodes
-	int ret = dbr.DecodeBuffer(ori.data, imgWidth, imgHeight, ori.step.p[0], IPF_RGB_888,"");
-	TextResultArray *resultArray = NULL;
-	dbr.GetAllTextResults(&resultArray);
-	for (int index = 0; index < resultArray->resultsCount; index++)
+	if (isAuto)
 	{
-		printf("Barcode %d:\n", index + 1);
-		printf("    Type: %s\n", resultArray->results[index]->barcodeFormatString);
-		printf("    Text: %s\n", resultArray->results[index]->barcodeText);
+		// Decode barcodes
+		templateName = templateObj["LabelRecognitionParameterArray"][0]["Name"];
+		int ret = dbr.DecodeBuffer(imageCopy.data, imgWidth, imgHeight, imageCopy.step.p[0], IPF_RGB_888,"");
+		dbr.GetAllTextResults(&resultArray);
+		// for (int index = 0; index < resultArray->resultsCount; index++)
+		// {
+		// 	printf("Barcode %d:\n", index + 1);
+		// 	printf("    Type: %s\n", resultArray->results[index]->barcodeFormatString);
+		// 	printf("    Text: %s\n", resultArray->results[index]->barcodeText);
+		// 	printf("    x1: %d, y1: %d, x2: %d, y2: %d, x3: %d, y3: %d, x4: %d, y4: %d\n", resultArray->results[index]->localizationResult->x1,
+		// 	resultArray->results[index]->localizationResult->y1,
+		// 	resultArray->results[index]->localizationResult->x2,
+		// 	resultArray->results[index]->localizationResult->y2,
+		// 	resultArray->results[index]->localizationResult->x3,
+		// 	resultArray->results[index]->localizationResult->y3,
+		// 	resultArray->results[index]->localizationResult->x4,
+		// 	resultArray->results[index]->localizationResult->y4);
+		// }
+		ret = dlr.AppendSettingsFromString(templateObj.dump().c_str());
+		ret = dlr.UpdateReferenceRegionFromBarcodeResults(resultArray, templateName.c_str());
+		
 	}
-	ret = dlr.AppendSettingsFromString(templateObj.dump().c_str());
-	// printf("AppendSettingsFromString: %d\n", ret);
-	ret = dlr.UpdateReferenceRegionFromBarcodeResults(resultArray, templateName.c_str());
-	// printf("UpdateReferenceRegionFromBarcodeResults: %d\n", ret);
-	// Decode barcodes
-	
-	// settings.maxThreadCount = 3;
+
 	dlr.UpdateRuntimeSettings(&settings);
 
-	DLRImageData data = {ori.step.p[0] * imgHeight, ori.data, imgWidth, imgHeight, ori.step.p[0], DLR_IPF_RGB_888};
+	DLRImageData data = {imageCopy.step.p[0] * imgHeight, imageCopy.data, imgWidth, imgHeight, imageCopy.step.p[0], DLR_IPF_RGB_888};
 	TickMeter tm;
 	tm.start();
 	errorCode = dlr.RecognizeByBuffer(&data, templateName.c_str());
@@ -312,7 +325,7 @@ void doOCR()
 			printf("\r\nNo data detected.\r\n");
 		}
 		dlr.FreeDLRResults(&pDLRResults);
-		CBarcodeReader::FreeTextResults(&resultArray);
+		if (resultArray) CBarcodeReader::FreeTextResults(&resultArray);
 	}
 
 	showImage(windowName, ori);
@@ -359,7 +372,15 @@ void doRegionDetection()
 		printf("\r\nSetDetectRegion Error: %s\r\n", szErrorMsg);
 	}
 
-	doOCR();
+	doOCR(false);
+}
+
+void generalDetection() {
+	doOCR(false);
+}
+
+void barcodeDetection() {
+	doOCR(true);
 }
 
 void onMouse(int event, int x, int y, int f, void* ){
@@ -370,7 +391,8 @@ void onMouse(int event, int x, int y, int f, void* ){
 		break;
 		case EVENT_LBUTTONUP:
 		clicked = false;
-		doRegionDetection();
+		// doRegionDetection();
+		generalDetection();
 		break;
 		case EVENT_MOUSEMOVE:
 		endPoint.x = x, endPoint.y = y;
@@ -413,7 +435,7 @@ int main(int argc, const char* argv[])
 	// std::cout << templateObj["ReferenceRegionArray"][0]["Localization"]["BarcodeFormatIds"].dump() << std::endl;
 
 	bool bExit = false;
-	char pszImageFile[512] = { 0 };
+	
 	bool autoRegion = false;
 	tagDLRPoint region[4] = { {0,0},{100,0},{100,100},{0,100} };
 
@@ -442,6 +464,7 @@ int main(int argc, const char* argv[])
 		// Read an image
 		ori = imread(pszImageFile);
 		current = ori.clone();
+		imageCopy = ori.clone();
 		// namedWindow(windowName, WINDOW_AUTOSIZE);
 		namedWindow(windowName);
     	setMouseCallback(windowName, onMouse, NULL);
@@ -466,7 +489,7 @@ int main(int argc, const char* argv[])
 			showImage(windowName, ori);
 		}
 		else {
-			doOCR();
+			barcodeDetection();
 		}
 		
 		destroyWindow();
