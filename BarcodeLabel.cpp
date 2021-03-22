@@ -224,7 +224,7 @@ void showImage(string windowName, Mat &img)
 
 void doOCR(bool isAuto)
 {
-	double costTime = 0.0;
+	double elapsedTime = 0.0;
 	int errorCode = 0;
 
 	int imgHeight = ori.rows, imgWidth = ori.cols;
@@ -273,8 +273,8 @@ void doOCR(bool isAuto)
 	tm.start();
 	errorCode = dlr.RecognizeByBuffer(&data, templateName.c_str());
 	tm.stop();
-	costTime = tm.getTimeSec();
-	printf("time cost: %.2f seconds\n", costTime);
+	elapsedTime = tm.getTimeSec();
+	printf("time cost: %.2f seconds\n", elapsedTime);
 
 	if (errorCode != DLR_OK)
 		printf("\r\nFailed to recognize label : %s\r\n", dlr.GetErrorString(errorCode));
