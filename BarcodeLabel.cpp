@@ -247,20 +247,20 @@ void doOCR(bool isAuto)
 		templateName = templateObj["LabelRecognitionParameterArray"][0]["Name"];
 		int ret = dbr.DecodeBuffer(imageCopy.data, imgWidth, imgHeight, imageCopy.step.p[0], IPF_RGB_888,"");
 		dbr.GetAllTextResults(&resultArray);
-		// for (int index = 0; index < resultArray->resultsCount; index++)
-		// {
-		// 	printf("Barcode %d:\n", index + 1);
-		// 	printf("    Type: %s\n", resultArray->results[index]->barcodeFormatString);
-		// 	printf("    Text: %s\n", resultArray->results[index]->barcodeText);
-		// 	printf("    x1: %d, y1: %d, x2: %d, y2: %d, x3: %d, y3: %d, x4: %d, y4: %d\n", resultArray->results[index]->localizationResult->x1,
-		// 	resultArray->results[index]->localizationResult->y1,
-		// 	resultArray->results[index]->localizationResult->x2,
-		// 	resultArray->results[index]->localizationResult->y2,
-		// 	resultArray->results[index]->localizationResult->x3,
-		// 	resultArray->results[index]->localizationResult->y3,
-		// 	resultArray->results[index]->localizationResult->x4,
-		// 	resultArray->results[index]->localizationResult->y4);
-		// }
+		for (int index = 0; index < resultArray->resultsCount; index++)
+		{
+			printf("Barcode %d:\n", index + 1);
+			printf("    Type: %s\n", resultArray->results[index]->barcodeFormatString);
+			printf("    Text: %s\n", resultArray->results[index]->barcodeText);
+			printf("    x1: %d, y1: %d, x2: %d, y2: %d, x3: %d, y3: %d, x4: %d, y4: %d\n", resultArray->results[index]->localizationResult->x1,
+			resultArray->results[index]->localizationResult->y1,
+			resultArray->results[index]->localizationResult->x2,
+			resultArray->results[index]->localizationResult->y2,
+			resultArray->results[index]->localizationResult->x3,
+			resultArray->results[index]->localizationResult->y3,
+			resultArray->results[index]->localizationResult->x4,
+			resultArray->results[index]->localizationResult->y4);
+		}
 		ret = dlr.AppendSettingsFromString(templateObj.dump().c_str());
 		ret = dlr.UpdateReferenceRegionFromBarcodeResults(resultArray, templateName.c_str());
 		
@@ -436,7 +436,7 @@ int main(int argc, const char* argv[])
 
 	bool bExit = false;
 	
-	bool autoRegion = false;
+	bool autoRegion = true;
 	tagDLRPoint region[4] = { {0,0},{100,0},{100,100},{0,100} };
 
 	printf("*************************************************\r\n");
@@ -457,9 +457,9 @@ int main(int argc, const char* argv[])
 		if (bExit)
 			break;
 
-		bExit = GetIfAutoDetectRegion(autoRegion);
-		if (bExit)
-			break;
+		// bExit = GetIfAutoDetectRegion(autoRegion);
+		// if (bExit)
+		// 	break;
 
 		// Read an image
 		ori = imread(pszImageFile);
@@ -467,7 +467,7 @@ int main(int argc, const char* argv[])
 		imageCopy = ori.clone();
 		// namedWindow(windowName, WINDOW_AUTOSIZE);
 		namedWindow(windowName);
-    	setMouseCallback(windowName, onMouse, NULL);
+    	// setMouseCallback(windowName, onMouse, NULL);
 
 		int imgHeight = ori.rows, imgWidth = ori.cols;
 	
